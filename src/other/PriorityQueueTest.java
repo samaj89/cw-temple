@@ -19,5 +19,9 @@ public class PriorityQueueTest {
         System.out.println(pqs.toString());
         pqs.updatePriority("First", 2.00);
         System.out.println(pqs.toString());
+        pqs.add("Fourth", 3.00);
+        pqs.add("Fifth", 3.00);
+        pqs.add("Sixth", 3.00);
+        System.out.println(pqs.toString());
     }
 }
