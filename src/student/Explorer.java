@@ -4,9 +4,7 @@ import game.EscapeState;
 import game.ExplorationState;
 import game.NodeStatus;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Explorer {
 
@@ -41,25 +39,34 @@ public class Explorer {
      * @param state the information available at the current state
      */
     public void explore(ExplorationState state) {
-        Set<Long> seen = new LinkedHashSet<>();
+        Set<Long> visited = new LinkedHashSet<>();
+        TreeNode tree = new TreeNode(state.getCurrentLocation(), state.getDistanceToTarget());
+        TreeNode current = tree;
+        boolean orbFound = false;
+        Collection<NodeStatus> neighbours;
 
-        while (state.getDistanceToTarget() != 0) {
-            Collection<NodeStatus> cns = state.getNeighbours();
-            // add current position to seen items
-            seen.add(state.getCurrentLocation());
-
-            int distance = Integer.MAX_VALUE;
-            long id = -1L;
-            for (NodeStatus ns : cns) {
-                if (ns.getDistanceToTarget() < distance && !seen.contains(ns.getId())) {
-                    distance = ns.getDistanceToTarget();
-                    id = ns.getId();
+        while (!orbFound) {
+            visited.add(current.getId());
+            if (current.getDistance() == 0) {
+                orbFound = true;
+            } else {
+                neighbours = state.getNeighbours();
+                List<NodeStatus> neighboursToAdd = new ArrayList<>();
+                for (NodeStatus n : neighbours) {
+                    if (!visited.contains(n.getId())) {
+                        neighboursToAdd.add(n);
+                    }
+                }
+                if (neighboursToAdd.size() == 0) {
+                    current = current.getParent();
+                    state.moveTo(current.getId());
+                    current.getChildren().poll();
+                } else {
+                    current.addChildren(neighboursToAdd);
+                    current = current.getChildren().peek();
+                    state.moveTo(current.getId());
                 }
             }
-            System.out.println("Moving to tile with id: " + id);
-            System.out.println("Moving from position: " + state.getCurrentLocation());
-            state.moveTo(id);
-            System.out.println("\t to: " + state.getCurrentLocation());
         }
     }
 
