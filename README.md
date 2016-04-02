@@ -16,3 +16,22 @@ neighbours and continue, repeating until the orb is found.
 This algorithm works well for small, simple maps, but there is a lot of inefficient travelling as the maps get larger
 and more complex. For now, focus is on getting a working solution, but may revisit later to try to find a more efficient
 solution.
+
+#### First pass at coding escape()
+
+The coursework specification says that getting to the exit should be prioritised over collecting gold, therefore my first
+pass at coding escape() simply finds the shortest path from the start node to the exit, picking up any gold that happens
+to be on that path.
+
+More online research suggests using Djikstra's algorithm to find the shortest path between nodes. As this algorithm finds
+the shortest path between the source node and all nodes in the graph if it runs to completion, my implementation stops
+once the shortest path to the exit has been found so as to avoid unnecessary computation.
+
+This implementation also required creating a Vertex class. There is one instance of this class for each Node in the graph,
+and allows the recording of the shortest distance needed to reach this node, as well as the previous node along the
+shortest path to the given node (this allows for reconstruction of the shortest path from source to exit once Djikstra's)
+algorithm has completed.
+
+As this solution finds the shortest path from source to exit, there is often plenty of unused time which could have been
+used to collect gold lying away from this path. I may revisit later to see if there is a way of diverging from the
+shortest path without running out of time.
