@@ -13,6 +13,5 @@ public class GUImain {
     public static void main(String[] args) {
         Optional<Long> seed = Utilities.parseSeedArgs(args);
         GameState.runNewGame((seed.isPresent() ? seed.get() : 0), true);
-        //GameState.runNewGame(-1474572043693673521L, true);
     }
 }
