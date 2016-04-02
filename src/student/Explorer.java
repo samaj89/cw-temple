@@ -1,8 +1,6 @@
 package student;
 
-import game.EscapeState;
-import game.ExplorationState;
-import game.NodeStatus;
+import game.*;
 
 import java.util.*;
 
@@ -94,6 +92,132 @@ public class Explorer {
      * @param state the information available at the current state
      */
     public void escape(EscapeState state) {
-        //TODO: Escape from the cavern before time runs out
+        List<Vertex> paths = findShortestPaths(state);
+        Stack<Node> pathToExit = getPathToExit(state, paths);
+        followPathToExit(state, pathToExit);
+    }
+
+    /**
+     * Private method representing an implementation of Djikstra's algorithm for
+     * finding the shortest path between nodes in a graph, starting from the current
+     * location of the sprite after picking up the orb. Will stop once the shortest
+     * path to the exit has been found.
+     *
+     * @param state the game state containing the current maze being attempted
+     * @return a list of Vertex objects, each of which holds a node of the maze,
+     * the shortest distance required to reach that node, and the previous node in
+     * the path to the given node. Will include a vertex containing the exit node
+     * if there is one.
+     */
+    private List<Vertex> findShortestPaths(EscapeState state) {
+        Collection<Node> allNodes = state.getVertices();
+        PriorityQueue<Vertex> unsettledPQ = new PriorityQueueImpl<>();
+        List<Vertex> unsettledList = new ArrayList<>();
+        List<Vertex> settled = new ArrayList<>();
+        List<Node> settledNodes = new ArrayList<>();
+        Node source = state.getCurrentNode();
+        Vertex sourceVertex = new Vertex(source);
+        sourceVertex.setDistance(0);
+        unsettledPQ.add(sourceVertex, (double) sourceVertex.getDistance());
+        unsettledList.add(sourceVertex);
+        for (Node n : allNodes) {
+            if (!n.equals(source)) {
+                Vertex v = new Vertex(n);
+                unsettledList.add(v);
+                unsettledPQ.add(v, (double) v.getDistance());
+            }
+        }
+        while (unsettledPQ.size() != 0) {
+            Vertex eval = unsettledPQ.poll();
+            settled.add(eval);
+            settledNodes.add(eval.getVertexNode());
+            if (eval.getVertexNode().equals(state.getExit())) {
+                return settled;
+            }
+            int distSoFar = eval.getDistance();
+            for (Edge e : eval.getVertexNode().getExits()) {
+                Node otherNode = e.getOther(eval.getVertexNode());
+                Vertex otherVertex = null;
+                if (!settledNodes.contains(otherNode)) {
+                    int possNewDist = distSoFar + e.length();
+                    for (Vertex u : unsettledList) {
+                        if (u.getVertexNode().equals(otherNode)) {
+                            otherVertex = u;
+                        }
+                    }
+                    if (possNewDist < otherVertex.getDistance()) {
+                        otherVertex.setDistance(possNewDist);
+                        otherVertex.setPreviousNode(eval.getVertexNode());
+                        unsettledPQ.updatePriority(otherVertex, possNewDist);
+                        for (Vertex u : unsettledList) {
+                            if (u.getVertexNode().equals(otherNode)) {
+                                u = otherVertex;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return settled;
+    }
+
+    /**
+     *
+     * @param state the game state containing the current maze being attempted
+     * @param allPaths a list of Vertex objects, each of which record the shortest path
+     *                 to the vertex's node.
+     * @return a stack of nodes representing the path from the source node to the exit.
+     */
+    private Stack<Node> getPathToExit(EscapeState state, List<Vertex> allPaths) {
+        Node exit = state.getExit();
+        Vertex nextVertex = null;
+        for (Vertex v : allPaths) {
+            if (v.getVertexNode().equals(exit)) {
+                nextVertex = v;
+            }
+        }
+        Stack<Node> pathToExit = new Stack<>();
+        Node previousNode = nextVertex.getPreviousNode();
+        while(!previousNode.equals(state.getCurrentNode())) {
+            pathToExit.push(previousNode);
+            for (Vertex v : allPaths) {
+                if (v.getVertexNode().equals(previousNode)) {
+                    nextVertex = v;
+                }
+            }
+            previousNode = nextVertex.getPreviousNode();
+        }
+        return pathToExit;
+    }
+
+    /**
+     * Private method that feeds the sprite instructions on how to move through
+     * the maze in order to reach the exit.
+     *
+     * @param state the game state containing the current maze being attempted
+     * @param path a stack of nodes representing the path from the source node to
+     *             the exit
+     */
+    private void followPathToExit(EscapeState state, Stack<Node> path) {
+        while (!path.isEmpty()) {
+            state.moveTo(path.pop());
+            tryToPickUpGold(state);
+        }
+        state.moveTo(state.getExit());
+    }
+
+    /**
+     * Private method that attempts to pick up gold from a tile. There are no
+     * ill effects if the attempt is unsuccessful (i.e. if there was never any gold
+     * on the tile or if the gold has already been picked up.
+     *
+     * @param state the game state containing the current maze being attempted
+     */
+    private void tryToPickUpGold(EscapeState state) {
+        try {
+            state.pickUpGold();
+        } catch (IllegalStateException ex) {
+            //do nothing
+        }
     }
 }
