@@ -92,7 +92,7 @@ public class Explorer {
      * @param state the information available at the current state
      */
     public void escape(EscapeState state) {
-        List<Vertex> paths = findShortestPaths(state);
+        List<Vertex> paths = findShortestPaths(state, state.getExit());
         Stack<Node> pathToExit = getPathToExit(state, paths);
         followPathToExit(state, pathToExit);
     }
@@ -109,7 +109,7 @@ public class Explorer {
      * the path to the given node. Will include a vertex containing the exit node
      * if there is one.
      */
-    private List<Vertex> findShortestPaths(EscapeState state) {
+    private List<Vertex> findShortestPaths(EscapeState state, Node destination) {
         Collection<Node> allNodes = state.getVertices();
         PriorityQueue<Vertex> unsettledPQ = new PriorityQueueImpl<>();
         List<Vertex> unsettledList = new ArrayList<>();
@@ -131,7 +131,7 @@ public class Explorer {
             Vertex eval = unsettledPQ.poll();
             settled.add(eval);
             settledNodes.add(eval.getVertexNode());
-            if (eval.getVertexNode().equals(state.getExit())) {
+            if (eval.getVertexNode().equals(destination)) {
                 return settled;
             }
             int distSoFar = eval.getDistance();
