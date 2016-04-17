@@ -93,8 +93,8 @@ public class Explorer {
      */
     public void escape(EscapeState state) {
         List<Vertex> paths = findShortestPaths(state, state.getExit());
-        Stack<Node> pathToExit = getPathToExit(state, paths);
-        followPathToExit(state, pathToExit);
+        Stack<Node> pathToExit = getPathToDestination(state, paths, state.getExit());
+        followPathToDestination(state, pathToExit);
     }
 
     /**
@@ -168,18 +168,18 @@ public class Explorer {
      *                 to the vertex's node.
      * @return a stack of nodes representing the path from the source node to the exit.
      */
-    private Stack<Node> getPathToExit(EscapeState state, List<Vertex> allPaths) {
-        Node exit = state.getExit();
+    private Stack<Node> getPathToDestination(EscapeState state, List<Vertex> allPaths, Node destination) {
         Vertex nextVertex = null;
         for (Vertex v : allPaths) {
-            if (v.getVertexNode().equals(exit)) {
+            if (v.getVertexNode().equals(destination)) {
                 nextVertex = v;
             }
         }
-        Stack<Node> pathToExit = new Stack<>();
+        Stack<Node> pathToDest = new Stack<>();
+        pathToDest.push(nextVertex.getVertexNode());
         Node previousNode = nextVertex.getPreviousNode();
         while(!previousNode.equals(state.getCurrentNode())) {
-            pathToExit.push(previousNode);
+            pathToDest.push(previousNode);
             for (Vertex v : allPaths) {
                 if (v.getVertexNode().equals(previousNode)) {
                     nextVertex = v;
@@ -187,7 +187,7 @@ public class Explorer {
             }
             previousNode = nextVertex.getPreviousNode();
         }
-        return pathToExit;
+        return pathToDest;
     }
 
     /**
@@ -198,12 +198,11 @@ public class Explorer {
      * @param path a stack of nodes representing the path from the source node to
      *             the exit
      */
-    private void followPathToExit(EscapeState state, Stack<Node> path) {
-        while (!path.isEmpty()) {
-            state.moveTo(path.pop());
+    private void followPathToDestination(EscapeState state, Stack<Node> path) {
+        do {
             tryToPickUpGold(state);
-        }
-        state.moveTo(state.getExit());
+            state.moveTo(path.pop());
+        } while (!path.isEmpty());
     }
 
     /**
