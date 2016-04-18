@@ -1,5 +1,11 @@
 # PiJ Coursework 4
 
+This repository contains my solution to PiJ coursework assignment 4, "George Osborne and the Temple of Gloom!". It was
+completed independently (no partner). The student package, which contains my code for the explore() and escape()
+methods of the Explorer class, also contains two classes that I have created to aid with the task: TreeNode (for the
+explore() method) and Vertex (for the escape() method). The below notes document my progression with the task and detail
+limitations with my solution.
+
 #### First pass at coding explore()
 
 Various online videos on graph search algorithms suggested implementation using some sort of tree structure to keep
