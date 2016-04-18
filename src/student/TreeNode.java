@@ -13,7 +13,10 @@ import java.util.List;
  * that represent the maze tile's neighbouring tiles (prioritised by distance from target),
  * and a parent TreeNode representing the maze tile traversed just before the current maze
  * tile.
+ *
+ * @author Sam Jansen
  */
+
 public class TreeNode {
     private final long id;
     private final int distance;
